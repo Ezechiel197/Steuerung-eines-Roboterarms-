@@ -1,0 +1,24 @@
+MODULE modul1
+    CONST robtarget PenBlack:=[[352,-326.91,329],[1,0,0,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget PenBlue:=[[459,-326.91,329],[1,0,0,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget PenGreen:=[[566,-326.91,329],[1,0,0,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget PenRed:=[[352,-326.91,329],[1,0,0,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget BoardCenter:=[[687,78,14],[1,0,0,0],[0,0,0,180],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    LOCAL PROC Path_10()
+        ConfJ\Off;
+        MoveJ PenBlack,v1000,z100,Front_TCP\WObj:=wobj0;
+        SetDO Auto,1;
+        MoveL PenBlue,v1000,z100,Back_TCP\WObj:=wobj0;
+        MoveL PenGreen,v1000,z100,Back_TCP\WObj:=wobj0;
+        MoveL PenRed,v1000,z100,Back_TCP\WObj:=wobj0;
+        MoveL BoardCenter,v1000,z100,Back_TCP\WObj:=wobj0;
+        ConfJ\On;
+    ENDPROC
+    LOCAL PROC Grab_Pen()
+        MoveJ Offs(PenBlack, 0, 0, 100),v1000,z100,Front_TCP\WObj:=wobj0;
+        MoveL PenBlack,v30,z0,Front_TCP\WObj:=wobj0;
+        WaitTime .1;
+        MoveL Offs(PenBlack, 0, 0, 5),v10,z1,Front_TCP\WObj:=wobj0;
+        MoveL Offs(PenBlack, 0, 100, 5),v50,z1,Front_TCP\WObj:=wobj0;
+    ENDPROC
+ENDMODULE

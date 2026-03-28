@@ -1,0 +1,272 @@
+MODULE LogoDrawer
+    CONST robtarget Black_Pen_Target:=[[352,-326.911,322.5],[0,-0.707106781,0.707106781,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget Blue_Pen_Target:=[[459,-326.91,322.5],[0,-0.707106781,0.707106781,0],[-1,0,-2,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget Green_Pen_Target:=[[566,-326.911,322.5],[0,-0.707106781,0.707106781,0],[-1,0,-2,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget Red_Pen_Target:=[[673,-326.911,322.5],[0,-0.707106781,0.707106781,0],[-1,0,-2,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    
+    VAR num x := 10; ! SIZE OF THE LOGO IN MM
+    CONST num DrawOffset := -5;
+    VAR intnum Color;
+    VAR intnum FachbereichInput;
+    
+    PROC main()
+        ! USER PROMPTS
+        Prompt_Size;
+        Prompt_FB;
+        Prompt_Color;
+    
+        Grab_Pen Color;
+        
+        MOVEJ Offs(BoardCenter, 0,0,100), v100, z0, Pen_TCP\WObj:=wobj0;
+        
+        ! MOVE TO TOP LEFT BINARY START
+        MOVEJ Offs(BoardCenter, 2.75 * x, 12 * x, 10), v100, z0, Pen_TCP\WObj:=wobj0;
+        
+        Draw_THM_Binary_Code Offs(BoardCenter, 2.75 * x, 12 * x, 10);
+        
+        ! MOVE TO LINE START
+        MOVEL Offs(Offs(BoardCenter, 2.75 * x, 12 * x, 10), 0, -6*x, 0), v100, z0, Pen_TCP\WObj:=wobj0;
+        
+        ! VERTICAL LINE
+        MOVEL Offs(Offs(BoardCenter, 2.75 * x, 12 * x, 10), 0, -6*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(Offs(BoardCenter, 2.75 * x, 12 * x, 10), -5.5*x, -6*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(Offs(BoardCenter, 2.75 * x, 12 * x, 10), -5.5*x, -6*x, 0), v30, z0, Pen_TCP\WObj:=wobj0;
+        
+        ! MOVE TO LETTER START
+        MOVEL Offs(Offs(BoardCenter, 2.75 * x, 12 * x, 10), 0, -8*x, 0), v100, z0, Pen_TCP\WObj:=wobj0;
+        
+        Draw_THM_Letters Offs(Offs(BoardCenter, 2.75 * x, 12 * x, 10), 0, -8*x, 0);
+        
+        Put_Back_Pen;
+    ENDPROC
+    
+    LOCAL PROC Prompt_Size()
+        TPReadNum x, "Geben Sie eine Größe für ein Kästchen des Logos in Millimetern an (Max 20mm)";
+        IF x > 20 THEN
+            Prompt_Size;
+        ENDIF
+    ENDPROC
+    
+    LOCAL PROC Prompt_FB()
+        TPReadNum FachbereichInput, "Geben Sie die Nummer des Fachbereichs an für das Logo an (Max 99)";
+        IF FachbereichInput > 99 THEN
+            Prompt_FB;
+        ENDIF
+    ENDPROC
+    
+    LOCAL PROC Prompt_Color()
+         TPReadNum Color, "Wählen Sie eine Farbe (0: Schwarz, 1: Blau, 2: Grün, 3: Rot)";
+        IF Color > 3 OR Color < 0 THEN
+            Prompt_Color;
+        ENDIF
+    ENDPROC
+    
+    LOCAL PROC Grab_Pen(intnum color)
+        VAR robtarget target;
+        Target_From_Color target;
+        
+        MoveJ Offs(target, 0, 0, 100),v1000,z100,Front_TCP\WObj:=wobj0;
+        !OPEN GRIPPER
+        SetDO LOCAL_IO_0_DO1,1;
+        SetDO LOCAL_IO_0_DO2,0;
+        WaitTime .5;
+        MoveL Offs(target, 0, 0, -70),v30,z0,Front_TCP\WObj:=wobj0;
+        WaitTime .5;
+        !CLOSE GRIPPER
+        SetDO LOCAL_IO_0_DO1,0;
+        SetDO LOCAL_IO_0_DO2,1;
+        
+        MoveL Offs(target, 0, 0, -62),v10,z0,Front_TCP\WObj:=wobj0;
+        MoveL Offs(target, 0, 80, -62),v30,z0,Front_TCP\WObj:=wobj0;
+    ENDPROC
+    
+    LOCAL PROC Target_From_Color(INOUT robtarget target)
+        TEST color
+            CASE 0:
+                target := Black_Pen_Target;
+            CASE 1:
+                target := Blue_Pen_Target;
+            CASE 2:
+                target := Green_Pen_Target;
+            CASE 3:
+                target := Red_Pen_Target;
+        ENDTEST
+    ENDPROC
+    
+    LOCAL PROC Put_Back_Pen()
+        VAR robtarget target;
+        Target_From_Color target;
+        
+        MoveJ Offs(target, 0, 80, -62),v50,z0,Front_TCP\WObj:=wobj0;
+        MoveL Offs(target, 0, 0, -62),v10,z0,Front_TCP\WObj:=wobj0;
+        !OPEN GRIPPER
+        SetDO LOCAL_IO_0_DO1,1;
+        SetDO LOCAL_IO_0_DO2,0;
+        WaitTime .5;
+        
+        MoveL Offs(target, 0, 0, 100),v50,z0,Front_TCP\WObj:=wobj0;
+    ENDPROC
+    
+    LOCAL PROC Draw_Square(robtarget start, bool filled)
+        ! LOWER PEN
+        MOVEL Offs(start, 0, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        
+        ! DRAW OUTLINE
+        MOVEL Offs(start, 0, -x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -x, -x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -x, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, 0, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        
+        IF (filled) THEN
+            
+            ! VERTICAL LINES
+            FOR i FROM 1 TO 10 DO
+                ! MOVE BACK AND FORTH
+                IF i MOD 2 = 0 THEN 
+                    MOVEL Offs(start, 0, -x * i / 10, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+                    MOVEL Offs(start, -x, -x * i / 10, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+                ELSE
+                    MOVEL Offs(start, -x, -x * i / 10, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+                    MOVEL Offs(start, 0, -x * i / 10, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+                ENDIF
+            ENDFOR
+            
+            ! HORIZONTAL LINES
+            FOR i FROM 0 TO 9 DO
+                ! MOVE BACK AND FORTH
+                IF i MOD 2 = 0 THEN 
+                    MOVEL Offs(start, -x * (10 - i) / 10, -x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+                    MOVEL Offs(start, -x * (10 - i) / 10, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+                ELSE
+                    MOVEL Offs(start, -x * (10 - i) / 10, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+                    MOVEL Offs(start, -x * (10 - i) / 10, -x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+                ENDIF
+            ENDFOR
+        ENDIF
+        
+        !RAISE PEN
+        MOVEL Offs(start, -x / 10, -x, 0), v30, z0, Pen_TCP\WObj:=wobj0;
+    ENDPROC
+    
+    LOCAL PROC Draw_THM_Binary_Code(robtarget start)
+        ! SPLIT FACHBEREICH IN PLACES FOR THE SEPARATE COLUMNS
+        VAR intnum tensPlace := 0;
+        VAR intnum onesPlace := 0;
+        VAR bool fillSquare := FALSE;
+        
+        tensPlace := FachbereichInput / 10;
+        onesPlace := FachbereichInput MOD 10;
+        
+        FOR COLUMN FROM 0 TO 2 DO
+            FOR ROW FROM 0 TO 3 DO
+                ! DONT DRAW THE FIRST SQUARE
+                IF COLUMN <> 0 OR ROW <> 0 THEN
+                    Fill_Square_Binary tensPlace, onesPlace, ROW, COLUMN, fillSquare;
+                
+                    WaitTime(.2);
+                    MoveL Offs(start, -ROW * 1.5 * x, -COLUMN * 1.5 * x, 0), v50, z0,  Pen_TCP\WObj:=wobj0;
+                    Draw_Square Offs(start, -ROW * 1.5 * x, -COLUMN * 1.5 * x, 0), fillSquare;
+                ENDIF
+            ENDFOR
+        ENDFOR
+    ENDPROC
+    
+    LOCAL PROC Fill_Square_Binary(INOUT num tensPlace, INOUT num onesPlace, num ROW, num COLUMN, INOUT bool fill)
+        ! GIESSEN ONLY
+        IF COLUMN = 0 THEN
+            fill := ROW = 3;
+        ENDIF
+        
+        ! FILL SQUARES FROM TOP TO BOTTOM
+        ! TENS BINARY
+        IF COLUMN = 1 THEN
+             fill := tensPlace - Pow(2, 3-ROW) >= 0;     !2^(3-ROW)
+            IF fill THEN
+                tensPlace := tensPlace - Pow(2, 3-ROW);  !SUBTRACT THE VALUE OF FILLED SQUARE
+            ENDIF
+        ENDIF
+                
+        ! ONES BINARY
+        IF COLUMN = 2 THEN
+            fill := onesPlace - Pow(2, 3-ROW) >= 0;      !2^(3-ROW)
+            IF fill THEN
+                onesPlace := onesPlace - Pow(2, 3-ROW);  !SUBTRACT THE VALUE OF FILLED SQUARE
+            ENDIF
+        ENDIF
+    ENDPROC
+    
+    LOCAL PROC Draw_THM_Letters(robtarget start)
+        ! LOWER PEN
+        MOVEL Offs(start, 0, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        
+        ! DRAW T
+        DRAW_T start;
+        
+        ! RAISE PEN
+        MOVEL start, v30, z0, Pen_TCP\WObj:=wobj0;
+        
+        MOVEL Offs(start, 0, -5.25 * x, 0), v30, z0, Pen_TCP\WObj:=wobj0;
+        
+        ! LOWER PEN
+        MOVEL Offs(Offs(start, 0, -5.25 * x, 0), 0, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        
+        ! DRAW H
+        DRAW_H Offs(start, 0, -5.25 * x, 0);
+        
+        ! RAISE PEN
+        MOVEL Offs(start, 0, -5.25 * x, 0), v30, z0, Pen_TCP\WObj:=wobj0;
+        
+        MOVEL Offs(start, 0, -10.5 * x, 0), v30, z0, Pen_TCP\WObj:=wobj0;
+        
+        ! LOWER PEN
+        MOVEL Offs(Offs(start, 0, -10.5 * x, 0), 0, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        
+        ! DRAW M
+        DRAW_M  Offs(start, 0, -10.5 * x, 0);
+        
+        ! RAISE PEN
+        MOVEL Offs(start, 0, -10.5 * x, 0), v30, z0, Pen_TCP\WObj:=wobj0;
+    ENDPROC
+    
+    LOCAL PROC DRAW_T(robtarget start)
+        MOVEL Offs(start, 0, -4*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -x, -4*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -x, -2.5*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -5.5*x, -2.5*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -5.5*x, -1.5*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -x, -1.5*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -x, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, 0, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+    ENDPROC
+    
+    LOCAL PROC DRAW_H(robtarget start)
+        MOVEL Offs(start, 0, -x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -2.25*x, -x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -2.25*x, -3*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, 0, -3*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, 0, -4*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -5.5*x, -4*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -5.5*x, -3*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -3.5*x, -3*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -3.5*x, -x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -5.5*x, -x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -5.5*x, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, 0, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+    ENDPROC
+    
+    LOCAL PROC DRAW_M(robtarget start)
+        MOVEL Offs(start, 0, -x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -3*x, -2.75*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, 0, -4.5*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, 0, -5.5*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -5.5*x, -5.5*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -5.5*x, -4.5*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -2*x, -4.5*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -4.5*x, -3.25*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -4.5*x, -2.25*x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -2*x, -x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -5.5*x, -x, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, -5.5*x, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+        MOVEL Offs(start, 0, 0, DrawOffset), v30, z0, Pen_TCP\WObj:=wobj0;
+    ENDPROC
+ENDMODULE
