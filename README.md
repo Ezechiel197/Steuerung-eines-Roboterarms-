@@ -8,7 +8,7 @@ The program is highly dynamic, allowing for user-defined scaling, color selectio
 **Key Features**
 **Dynamic Scaling:** Users can input a custom size x for the logo grid (up to 20mm). All coordinates are calculated relative to this value.
 
-Department Binary Encoding: A unique feature that prompts for a Department Number (Fachbereich) and renders it as a binary matrix within the logo using filled/hollow squares.
+**Department Binary Encoding:** A unique feature that prompts for a Department Number (Fachbereich) and renders it as a binary matrix within the logo using filled/hollow squares.
 
 **Automated Tool Handling:** The robot automatically picks up the requested pen from a rack and returns it safely after the drawing process.
 
