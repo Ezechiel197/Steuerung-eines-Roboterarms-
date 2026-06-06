@@ -32,7 +32,8 @@ The program is highly dynamic, allowing for user-defined scaling, color selectio
 The drawing uses the Offs() (Offset) function extensively. 
 This ensures that the entire logo is drawn relative to a single BoardCenter point, making the system easy to recalibrate if the paper is moved.
 
-**How to Use ?**.
+**How to Use ?**
+
 **Setup:** Ensure the pen rack is positioned according to the robtarget constants (Black_Pen_Target, etc.).
 
 **Calibration:** Define the BoardCenter WorkObject on your drawing surface.
