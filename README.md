@@ -50,7 +50,7 @@ Select the pen color (0–3).
 
 ---
 
-## :man_technologist: **Autor**
+## :man_technologist: **Author**
 **Ezechiel Tonkeme**
 
 
